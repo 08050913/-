@@ -1,0 +1,19 @@
+GET http://localhost:8080/api/apt
+Accept: application/json
+
+###
+DELETE http://localhost:8080/api/apt/1
+Accept: application/json
+
+###
+POST http://localhost:8080/api/apt
+Content-Type: application/json
+
+//{"patient":{"id": "1"},"doctor":{"id": "1"},"time":"2022-07-02","num":"23","clinic":{"title": "普通门诊"},"generate":"1"}
+{"patient":"1","doctor":"1","time":"2022-07-02","num":"23","clinic":"普通门诊","fees":"200","generate":"1"}
+
+### (patient,doctor,time,num,clinic,fees,generate)
+GET http://localhost:8080/api/apt/1
+Accept: application/json
+
+###

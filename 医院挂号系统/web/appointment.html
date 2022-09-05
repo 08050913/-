@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="zh">
+
+<head>
+    <title>预约挂号</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <!-- 引入element-ui -->
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+</head>
+
+<body>
+    <!-- 首页导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <a class="navbar-brand" href="#" onclick="window.location.href='/index.html'">东方医院 🏥</a>
+        <button class="navbar-toggler d-lg-none" type="button" data-toggle="collapse" data-target="#collapsibleNavId"
+            aria-controls="collapsibleNavId" aria-expanded="false" aria-label="Toggle navigation"></button>
+        <div class="collapse navbar-collapse" id="collapsibleNavId">
+            <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+
+                <li class="nav-item active mx-3">
+                    <a class="nav-link" href="#" onclick="window.location.href='/index.html'">首页</a>
+                </li>
+
+                <li class="nav-item dropdown mx-3">
+                    <a class="nav-link dropdown-toggle" href="#" id="dropdownId" data-toggle="dropdown"
+                        aria-haspopup="true" aria-expanded="false">医院概况</a>
+                    <div class="dropdown-menu" aria-labelledby="dropdownId">
+                        <a class="dropdown-item" href="#" onclick="window.location.href='/description.html'">医院介绍</a>
+                        <!-- <a class="dropdown-item" href="#">组织架构</a>
+                        <a class="dropdown-item" href="#">医院历史</a> -->
+                    </div>
+                </li>
+                <li class="nav-item dropdown mx-3">
+                    <a class="nav-link dropdown-toggle" href="#" id="dropdownId" data-toggle="dropdown"
+                        aria-haspopup="true" aria-expanded="false">医疗服务</a>
+                    <div class="dropdown-menu" aria-labelledby="dropdownId">
+                        <a class="dropdown-item" href="#" onclick="window.location.href='/scheduling.html'">门诊排班</a>
+                        <a class="dropdown-item" href="#" onclick="window.location.href='/appointment.html'">预约挂号</a>
+                        <!-- <a class="dropdown-item" href="#">住院须知</a>
+                        <a class="dropdown-item" href="#">医保专区</a>
+                        <a class="dropdown-item" href="#">体检服务</a> -->
+                    </div>
+                </li>
+                <li class="nav-item mx-3">
+                    <a class="nav-link" href="#" onclick="window.location.href='/index.html'">科室导航</a>
+                </li>
+                <li class="nav-item mx-3">
+                    <a class="nav-link" href="#">学术交流</a>
+                </li>
+            </ul>
+            <form class="form-inline my-2 my-lg-0">
+                <input class="form-control mr-sm-2" type="text" placeholder="搜索科室、医师">
+                <button class="btn btn-success my-2 my-sm-0 px-3" type="submit">搜索</button>
+            </form>
+        </div>
+    </nav>
+
+    <!-- 巨幕 -->
+    <div class="jumbotron jumbotron-fluid pb-1 pt-5 mb-0">
+        <div class="container">
+            <h1 class="display-3">预约挂号</h1>
+            <p class="lead">东方医院</p>
+        </div>
+    </div>
+    <!-- 页面导航 -->
+    <nav class="breadcrumb">
+        <a class="breadcrumb-item" href="index.html">科室导航</a>
+        <a class="breadcrumb-item" href="scheduling.html">门诊排班</a>
+        <a class="breadcrumb-item" href="patient.html">就诊人管理</a>
+        <span class="breadcrumb-item active">预约挂号</span>
+    </nav>
+
+    <div id="app">
+        <div class="container">
+            <!-- 添加预约 -->
+            <div v-if="id !== null">
+                <el-form ref="form" :model="form" label-width="80px">
+                    <el-form-item label="就诊人">
+                        <el-radio-group v-model="patientId">
+                            <el-radio v-for="(item, id) in patients" :label="id" :key="id">{{item.name}}</el-radio>
+                        </el-radio-group>
+                    </el-form-item>
+                    <el-form-item label="医生">
+                        <span>{{ form.doctor.name }}</span>
+                    </el-form-item>
+                    <el-form-item label="预约">
+                        <el-radio-group v-model="clinicId">
+                            <el-radio v-for="(item, id) in schedulings" :label="id" :key="id">{{item.time}}
+                                {{item.clinic[0].title}}</el-radio>
+                        </el-radio-group>
+                    </el-form-item>
+                    <el-form-item label="费用">
+                        <el-tag type="danger">{{form.clinic.fees || 0}}</el-tag>
+                    </el-form-item>
+                    <el-form-item>
+                        <el-button @click="cancel">取 消</el-button>
+                        <el-button type="primary" @click="onSubmit">预 约</el-button>
+                    </el-form-item>
+                </el-form>
+            </div>
+            <!-- 显示所有的预约 -->
+            <div v-else>
+                <el-table :data="list" style="width: 100%" border stripe>
+                    <el-table-column prop="patient.name" label="就诊人" width="180"></el-table-column>
+                    <el-table-column prop="doctor.name" label="医生" width="180"></el-table-column>
+                    <el-table-column prop="time" label="预约时间"></el-table-column>
+                    <el-table-column prop="num" label="预约流水号"></el-table-column>
+                    <el-table-column prop="clinic.title" label="预约门诊"></el-table-column>
+                    <el-table-column prop="clinic.fees" label="费用"></el-table-column>
+                    <el-table-column prop="generate" label="挂号时间"></el-table-column>
+                    <el-table-column label="操作" width="100">
+                        <template slot-scope="scope">
+                            <el-button type="danger" size="mini" @click="del(scope.row.id)">删 除</el-button>
+                        </template>
+                    </el-table-column>
+                </el-table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页脚&网址地图 -->
+    <div class="jumbotron jumbotron-fluid mb-0 mt-5 py-3">
+        <div class="container">
+            <p class="lead text-center">copyright 牛耳教育@2022</p>
+        </div>
+    </div>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+    <script src="./js/vue.js"></script>
+    <script src="./js/axios.min.js"></script>
+    <!-- 引入组件库 -->
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <script>
+        new Vue({
+            el: '#app',
+            data() {
+                return {
+                    baseURL: "http://172.22.149.135:8080",
+                    id: this.getUrlOption().id || null,
+                    form: {
+                        patient: {},
+                        doctor: {},
+                        time: "",
+                        // num: 0, // 流水号
+                        // generate: "",
+                        clinic: {}
+                    },
+                    list: [],
+                    patients: [], // 就诊人
+                    clinic: [], // 门诊
+                    schedulings: [], // 该医生的行程安排
+                    clinicId: -1,
+                    patientId: -1,
+                }
+            },
+            watch: {
+                clinicId(newId, oldId) {
+                    this.form.clinic = this.schedulings[newId].clinic[0];
+                    this.form.time = this.schedulings[newId].time;
+                },
+                patientId(newId, oldId) {
+                    this.form.patient = this.patients[newId];
+                }
+            },
+            async mounted() {
+                if (this.id !== null) { // 添加预约
+                    await this.getPatient();
+                    await this.getDoctor(this.id);
+                    await this.getDoctorSchedulings(this.id);
+                } else { // 显示所有的预约
+                    await this.getAllAppointment();
+                }
+            },
+            methods: {
+                async getPatient() {
+                    const res = await axios.get(this.baseURL + "/api/patient");
+                    if (res.status === 200) {
+                        this.patients = res.data;
+                    }
+                },
+                async getDoctor(id) {
+                    const res = await axios.get(this.baseURL + "/api/doctor/" + id);
+                    if (res.status === 200) {
+                        this.form.doctor = res.data;
+                    }
+                },
+                async getDoctorSchedulings(id) {
+                    const res = await axios.get(this.baseURL + "/api/scheduling/doctor/" + id);
+                    if (res.status === 200) {
+                        this.schedulings = res.data;
+                        // console.log(this.schedulings[0].clinic[0].title);
+                    }
+                },
+                // 获取路由参数
+                getUrlOption() {
+                    let str = window.location.search.substr(1).split("&");
+                    let obj = {};
+                    str.forEach(e => {
+                        let list = e.split("=");
+                        obj[list[0]] = list[1];
+                    });
+                    return obj
+                },
+                async getAllAppointment() {
+                    const res = await axios.get(this.baseURL + "/api/apt");
+                    if (res.status === 200) {
+                        this.list = res.data;
+                        console.log(this.list);
+                    }
+                },
+                async onSubmit() {
+                    if (this.clinicId !== -1 
+                        && this.patientId !== -1 
+                        // && this.getNum() // 有点 bug, 获取流水号放到后端了
+                        ) {
+                        axios.post(this.baseURL + "/api/apt", this.form).then(res => {
+                            console.log(res);
+                            if (res.status === 200) {
+                                this.$message.success("预约成功！");
+                                window.location.href = "/appointment.html";
+                            }
+                        }).catch(error => {
+                            this.$message.error("该诊所预约人数已满！");
+                        });
+                    } else {
+                        this.$message.error("非法选择！");
+                    }
+                },
+                cancel() {
+                    this.clinicId = -1;
+                    this.patientId = -1;
+                },
+                // async getNum() {
+                //     // 获取订单流水号
+                //     const res = await axios.get(this.baseURL + "/api/num")
+                //     if (res.status === 200) {
+                //         this.form.num = res.data;
+                //         // this.form.generate = new Date().toLocaleDateString('fr-CA');
+                //         // this.form.generate = `${date.getFullYear()}-${date.getMonth()}-${date.getDay()}`;
+                //         return true;
+                //     } else return false;
+                // },
+                del(id) {
+                    // console.log(id);
+                    axios.delete(this.baseURL + "/api/apt/" + id).then(res => {
+                        if (res.status === 200) {
+                            this.$message.success("删除成功！");
+                            this.getAllAppointment(); // 刷新
+                        }
+                    }).catch(error => {
+                        this.$message.error("删除失败！");
+                    });
+                }
+            }
+        });
+    </script>
+
+</body>
+
+</html>

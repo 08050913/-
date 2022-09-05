@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="zh">
+
+<head>
+    <title>就诊人管理</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <!-- 引入element-ui -->
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+</head>
+
+<body>
+    <!-- 首页导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <a class="navbar-brand" href="#" onclick="window.location.href='/index.html'">东方医院 🏥</a>
+        <button class="navbar-toggler d-lg-none" type="button" data-toggle="collapse" data-target="#collapsibleNavId"
+            aria-controls="collapsibleNavId" aria-expanded="false" aria-label="Toggle navigation"></button>
+        <div class="collapse navbar-collapse" id="collapsibleNavId">
+            <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+
+                <li class="nav-item active mx-3">
+                    <a class="nav-link" href="#" onclick="window.location.href='/index.html'">首页</a>
+                </li>
+
+                <li class="nav-item dropdown mx-3">
+                    <a class="nav-link dropdown-toggle" href="#" id="dropdownId" data-toggle="dropdown"
+                        aria-haspopup="true" aria-expanded="false">医院概况</a>
+                    <div class="dropdown-menu" aria-labelledby="dropdownId">
+                        <a class="dropdown-item" href="#" onclick="window.location.href='/description.html'">医院介绍</a>
+                        <!-- <a class="dropdown-item" href="#">组织架构</a>
+                        <a class="dropdown-item" href="#">医院历史</a> -->
+                    </div>
+                </li>
+                <li class="nav-item dropdown mx-3">
+                    <a class="nav-link dropdown-toggle" href="#" id="dropdownId" data-toggle="dropdown"
+                        aria-haspopup="true" aria-expanded="false">医疗服务</a>
+                    <div class="dropdown-menu" aria-labelledby="dropdownId">
+                        <a class="dropdown-item" href="#" onclick="window.location.href='/scheduling.html'">门诊排班</a>
+                        <a class="dropdown-item" href="#" onclick="window.location.href='/appointment.html'">预约挂号</a>
+                        <!-- <a class="dropdown-item" href="#">住院须知</a>
+                        <a class="dropdown-item" href="#">医保专区</a>
+                        <a class="dropdown-item" href="#">体检服务</a> -->
+                    </div>
+                </li>
+                <li class="nav-item mx-3">
+                    <a class="nav-link" href="#" onclick="window.location.href='/index.html'">科室导航</a>
+                </li>
+                <li class="nav-item mx-3">
+                    <a class="nav-link" href="#">学术交流</a>
+                </li>
+            </ul>
+            <form class="form-inline my-2 my-lg-0">
+                <input class="form-control mr-sm-2" type="text" placeholder="搜索科室、医师">
+                <button class="btn btn-success my-2 my-sm-0 px-3" type="submit">搜索</button>
+            </form>
+        </div>
+    </nav>
+
+    <!-- 巨幕 -->
+    <div class="jumbotron jumbotron-fluid pb-1 pt-5 mb-0">
+        <div class="container">
+            <h1 class="display-3">就诊人管理</h1>
+            <p class="lead">东方医院</p>
+        </div>
+    </div>
+    <!-- 页面导航 -->
+    <nav class="breadcrumb">
+        <a class="breadcrumb-item" href="index.html">科室导航</a>
+        <a class="breadcrumb-item" href="scheduling.html">门诊排班</a>
+        <span class="breadcrumb-item">就诊人管理</span>
+        <a class="breadcrumb-item" href="appointment.html">就诊服务</a>
+    </nav>
+
+    <div id="app">
+        <div class="container">
+            <button type="button" class="btn btn-success my-3" @click="addPatient">新增就诊人</button>
+
+            <table class="table table-striped table-hover">
+                <thead class="text-center">
+                    <tr>
+                        <th width="64px">姓名</th>
+                        <th width="128px">身份证号</th>
+                        <th width="64px">手机号</th>
+                        <th width="128px">操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="(item, id) in patients" :key="id">
+                        <td>{{item.name}}</td>
+                        <td>{{item.idCard}}</td>
+                        <td>{{item.phone}}</td>
+                        <td>
+                            <div class="row">
+                                <div class="col-lg-6 col-sm-12">
+                                    <button type="button" class="btn btn-outline-warning btn-sm btn-block"
+                                        @click="editPatient(id)">编辑</button>
+                                </div>
+                                <div class="col-lg-6 col-sm-12">
+                                    <button type="button"
+                                        class="btn btn-outline-danger btn-sm btn-block mt-lg-0 mt-sm-3"
+                                        @click="deletePatient(item.id)">删除</button>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <el-dialog title="就诊人信息" :visible.sync="dialog" width="30%" ref="ruleForm" center :close-on-click-modal=false>
+            <el-form ref="form" :model="form" label-width="80px" :rules="rules">
+                <el-form-item label="姓名" prop="name">
+                    <el-input v-model="form.name"></el-input>
+                </el-form-item>
+                <el-form-item label="身份证号" prop="idCard">
+                    <el-input v-model="form.idCard"></el-input>
+                </el-form-item>
+                <el-form-item label="手机号" prop="phone">
+                    <el-input v-model="form.phone"></el-input>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="dialog = false">取 消</el-button>
+                <el-button type="primary" @click="submitForm">{{flag === 0 ? '新 增' : '修 改'}}</el-button>
+            </span>
+        </el-dialog>
+    </div>
+
+    <!-- 页脚&网址地图 -->
+    <div class="jumbotron jumbotron-fluid mb-0 mt-5 py-3">
+        <div class="container">
+            <p class="lead text-center">copyright 牛耳教育@2022</p>
+        </div>
+    </div>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+    <script src="./js/vue.js"></script>
+    <script src="./js/axios.min.js"></script>
+    <!-- 引入组件库 -->
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <script>
+        // const baseURL = "http://172.22.149.135:8080";
+        new Vue({
+            el: '#app',
+            data() {
+                return {
+                    baseURL: "http://172.22.149.135:8080",
+                    patients: [],
+                    dialog: false,
+                    form: {
+                        name: "",
+                        idCard: "",
+                        phone: ""
+                    },
+                    rules: {
+                        name: { required: true, message: '请输入姓名', trigger: 'change' },
+                        idCard: { required: true, message: '请输入身份证号', trigger: 'change' },
+                        phone: { required: true, message: '请输入手机号', trigger: 'change' },
+                    },
+                    flag: 0
+                }
+            },
+            async mounted() {
+                await this.init();
+            },
+            methods: {
+                async init() {
+                    const res = await axios.get(this.baseURL + "/api/patient");
+                    if (res.status === 200) {
+                        this.patients = res.data;
+                    }
+                },
+                addPatient() {
+                    // 置空
+                    this.form = {
+                        name: "",
+                        idCard: "",
+                        phone: ""
+                    };
+                    this.flag = 0;
+                    this.dialog = true;
+                },
+                async deletePatient(id) {
+                    const res = await axios.delete(this.baseURL + "/api/patient/" + id);
+                    if (res.status === 200) {
+                        this.$message.success("删除成功");
+                        await this.init();
+                    } else {
+                        this.$message.error(); ("删除失败");
+                    }
+                },
+                editPatient(id) {
+                    this.flag = 1;
+                    this.dialog = true;
+                    this.form = {
+                        id: this.patients[id].id,
+                        name: this.patients[id].name,
+                        idCard: this.patients[id].idCard,
+                        phone: this.patients[id].phone
+                    };
+                },
+                submitForm() {
+                    this.$refs.form.validate(valid => {
+                        if (!valid) return;
+                        switch (this.flag) {
+                            // 新增
+                            case 0:
+                                axios.post(this.baseURL + "/api/patient", this.form).then(res => {
+                                    if (res.status === 200) {
+                                        this.$message.success("新增成功");
+                                        this.init();
+                                    }
+                                }).catch(error => {
+                                    this.$message.error("修改失败");
+                                });
+                                break;
+                            // 修改
+                            case 1:
+                                axios.put(this.baseURL + "/api/patient/" + this.form.id, this.form).then(res => {
+                                    if (res.status === 200) {
+                                        this.$message.success("修改成功");
+                                        this.init();
+                                    }
+                                }).catch(error => {
+                                    this.$message.error("修改失败");
+                                });
+                                break;
+                        }
+                        this.dialog = false;
+                    });
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
